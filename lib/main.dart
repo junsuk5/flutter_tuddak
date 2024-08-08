@@ -31,25 +31,51 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  final WebViewController controller = WebViewController()
+  final WebViewController webViewController = WebViewController()
     ..setJavaScriptMode(JavaScriptMode.unrestricted)
     ..loadRequest(Uri.parse('https://ootpd.mycafe24.com/'));
+
+  Future<void> _showAlert(String message) async {
+    return showDialog<void>(
+        context: context,
+        builder: (BuildContext ctx) {
+          return AlertDialog(
+            content: Text(message),
+            actions: <Widget>[
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(ctx).pop();
+                  },
+                  child: const Text('OK'))
+            ],
+          );
+        });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    webViewController.setOnJavaScriptAlertDialog((request) async {
+      await _showAlert(request.message);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PopScope(
+      body: PopScope<Object?>(
         canPop: false,
-        onPopInvoked: (didPop) async {
-          if (await controller.canGoBack()) {
-            await controller.goBack();
+        onPopInvokedWithResult: (bool didPop, Object? result) async {
+          if (await webViewController.canGoBack()) {
+            await webViewController.goBack();
           } else {
             SystemNavigator.pop();
           }
         },
         child: SafeArea(
           child: WebViewWidget(
-            controller: controller,
+            controller: webViewController,
           ),
         ),
       ),
