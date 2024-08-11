@@ -31,8 +31,11 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  final WebViewController webViewController = WebViewController()
+  late final WebViewController webViewController = WebViewController()
     ..setJavaScriptMode(JavaScriptMode.unrestricted)
+    ..setOnJavaScriptAlertDialog((request) async {
+      await _showAlert(request.message);
+    })
     ..loadRequest(Uri.parse('https://ootpd.mycafe24.com/'));
 
   Future<void> _showAlert(String message) async {
@@ -50,15 +53,6 @@ class _MainScreenState extends State<MainScreen> {
             ],
           );
         });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    webViewController.setOnJavaScriptAlertDialog((request) async {
-      await _showAlert(request.message);
-    });
   }
 
   @override
